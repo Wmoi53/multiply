@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+  orchestrator:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    command: uvicorn orchestrator.app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - GITHUB_REPO=${GITHUB_REPO}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    depends_on:
+      - redis
+  marketing_agent:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    command: python agents/marketing_agent.py
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - GITHUB_REPO=${GITHUB_REPO}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    depends_on:
+      - redis
+  schedule_agent:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    command: python agents/schedule_planner_agent.py
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis

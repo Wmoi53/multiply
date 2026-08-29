@@ -1,0 +1,21 @@
+# Example tasks for Master Chief orchestrator
+
+# Marketing task
+- type: marketing_brief
+  agent_label: marketing
+  payload:
+    topic: "Multiply v1 Launch"
+    audience: "early adopters"
+    deliverable: "social-post"
+
+---
+
+# Schedule task
+- type: schedule_plan
+  agent_label: schedule
+  payload:
+    project: "Multiply v1 Launch"
+    milestones:
+      - "Finalize copy"
+      - "Design assets"
+      - "Launch campaign"
