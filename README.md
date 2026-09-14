@@ -34,6 +34,18 @@ python agent/semantic_similarity.py "That is a happy person" \
     "That is a happy dog" "That is a very happy person" "Today is a sunny day"
 ```
 
+## AnyCoder-lite
+
+`anycoder/` is a scoped clone of [akhaliq/anycoder](https://huggingface.co/spaces/akhaliq/anycoder):
+describe an app in plain English, stream back generated code from a
+Hugging Face-hosted model (same model lineup as the original — DeepSeek V3,
+Kimi K2, GLM, MiniMax, Qwen3 Coder, etc.), and deploy the result as a new
+Hugging Face Space, all from one page. FastAPI backend (SSE streaming
+generation, one-click Space deploy) + Vite/React frontend, single-port
+Docker image for Space deployment. See
+[`anycoder/README.md`](anycoder/README.md) for local-dev and deploy
+instructions.
+
 ## Whisper → Gmail voice transcription
 
 `agent/whisper_transcribe.py` runs [openai/whisper-large-v3](https://huggingface.co/openai/whisper-large-v3)
