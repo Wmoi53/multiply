@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+
+# Gmail OAuth secrets (agent/gmail_voice_transcribe.py)
+agent/credentials.json
+agent/token.json
+.env
