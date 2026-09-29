@@ -1,0 +1,8 @@
+# Development / test dependencies only.
+# The ah_decision engine itself runs on the Python standard library alone
+# (no numpy/scipy/pyyaml required at runtime). These are for running tests.
+pytest>=7.0
+
+# Optional: install PyYAML if you want Config.from_yaml to use a full YAML
+# parser instead of the built-in flat-file fallback.
+# PyYAML>=6.0

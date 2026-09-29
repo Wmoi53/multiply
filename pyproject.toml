@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ah_decision"
+version = "0.1.0"
+description = "Market-aware Asian-Handicap decision engine with recent-market-conditions and fractional-Kelly sizing"
+readme = "README.md"
+requires-python = ">=3.10"
+# Runtime dependencies: NONE. The engine is pure Python standard library.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+yaml = ["PyYAML>=6.0"]
+
+[tool.setuptools]
+packages = ["ah_decision"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
