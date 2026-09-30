@@ -66,3 +66,67 @@ python -m pytest -q
 Defaults live in `ah_decision/config.py`. `config/pipeline_config.yaml` mirrors
 them with per-threshold comments and can be loaded via
 `Config.from_yaml("config/pipeline_config.yaml")`.
+
+## Backtesting
+
+The `backtest/` package turns the decision logic into **measured edge**: it
+replays historical fixtures through `ah_decision.decide`, settles each resulting
+bet against the final score using proper Asian-Handicap rules, and reports ROI,
+hit rate, CLV, calibration, and segment breakdowns. Runtime is pure Python
+standard library (same as the engine); `pytest` is only needed for the tests.
+
+### Fixture schema
+
+Each fixture carries the engine inputs plus the settled final score (so
+Asian-Handicap settlement is unambiguous). CSV columns:
+
+| column | type | meaning |
+| --- | --- | --- |
+| `label` | str | fixture identifier |
+| `home_odds` / `away_odds` | float | decimal odds for each side of the AH market |
+| `fair_home` / `fair_away` | float | model fair probabilities (0..1) |
+| `line` | float | **home-side** handicap (e.g. `-0.5`, `+0.25`, `-1.0`) |
+| `home_goals` / `away_goals` | int | final score |
+| `league` / `kickoff` / `bookmaker` | str | optional metadata for segment breakdowns |
+| `snapshots` | str | optional odds series `"ts:home:away|ts:home:away|..."` |
+
+JSON fixtures (`load_fixtures_json`) use the same field names, with `snapshots`
+as a list of `{"ts", "home_odds", "away_odds"}` objects. The sign convention
+matches the engine: `line` is the home handicap and the away handicap is its
+negation.
+
+### Settlement
+
+`settlement.ah_result(side, line, home_goals, away_goals)` returns a canonical
+outcome multiplier — `+1.0` full win, `+0.5` half win, `0.0` push, `-0.5` half
+loss, `-1.0` full loss — handling **whole** lines (win/push/loss), **half**
+lines (win/loss only), and **quarter** lines (stake split across the two
+adjacent lines, enabling half-win/half-loss). `settlement.settle_bet(decision,
+fixture)` converts that to profit for a 1-unit stake at the bet side's price:
+`(odds-1)` on a full win, `(odds-1)/2` on a half win, `0` on a push, `-0.5` on a
+half loss, `-1` on a full loss. PASS decisions settle to `0.0`.
+
+### Metrics
+
+`harness.run_backtest(cfg, fixtures, bankroll_mode, starting_bankroll)` loops the
+fixtures, calls `decide`, stakes `stake_fraction × bankroll` on each BET, and
+returns a `BacktestResult`. `bankroll_mode='flat'` stakes off the starting
+bankroll each time; `'compound'` stakes off the running bankroll and lets it
+feed back into sizing. `BacktestResult.summary()` reports fixture/bet counts,
+bet rate, win/half/push/loss counts, hit rate (pushes excluded), total staked,
+total profit, ROI/yield, average CLV proxy, final bankroll and growth multiple,
+plus edge-bucket **calibration** (predicted edge → realized yield) and **segment
+breakdowns** by side, steam vs non-steam movement, favorite vs underdog
+(price < 2.0), and deep vs shallow line (|line| ≥ 1.5).
+
+### Run the backtest CLI
+
+```bash
+python -m backtest run examples/sample_fixtures.csv
+python -m backtest run examples/sample_fixtures.csv --mode compound
+python -m backtest run fixtures.json --config config/pipeline_config.yaml --bankroll 100
+```
+
+`examples/sample_fixtures.csv` ships a dozen illustrative fixtures (favorites,
+underdogs, whole/half/quarter lines, and a couple with steam movement) so the
+CLI runs out of the box.
