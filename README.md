@@ -66,3 +66,19 @@ python -m pytest -q
 Defaults live in `ah_decision/config.py`. `config/pipeline_config.yaml` mirrors
 them with per-threshold comments and can be loaded via
 `Config.from_yaml("config/pipeline_config.yaml")`.
+
+## equity_decision
+
+A sibling package applying the same engine to US equities: it compares your
+fair probability of "up" with the market-implied probability, requires an edge
+(adjusted for momentum and realized volatility), sizes with fractional Kelly
+(capped), and emits BUY/HOLD/SELL with a heuristic choice distribution and
+conviction. Also provides `brier_score` and `expected_calibration_error`.
+
+```bash
+python -m equity_decision.example
+```
+
+**Caveats:** this does not predict stocks; it is not financial advice;
+`market_p_up` must be a real market-implied probability (e.g. options-implied),
+not a guess. The BUY/HOLD/SELL distribution is a heuristic, not calibrated.
