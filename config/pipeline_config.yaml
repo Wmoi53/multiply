@@ -1,0 +1,41 @@
+# Pipeline configuration for the market-aware Asian-Handicap decision engine.
+# Flat key: value pairs mirroring ah_decision.config.Config defaults.
+# Loaded via Config.from_yaml(path). Uses PyYAML if installed, otherwise a
+# tiny built-in flat parser -- the runtime stays standard-library only.
+# Percentages are in percentage points of probability; odds are decimal;
+# stake fractions are fractions of bankroll.
+
+# --- core edge gates ---
+min_abs_edge_pct: 1.5        # baseline edge required before a bet is considered
+edge_floor_pct: 0.5          # hard floor; the required edge never drops below this
+max_overround_pct: 6.0       # skip markets whose vig exceeds this (too juicy)
+
+# --- extreme price handling ---
+extreme_low_odds: 1.50       # odds below this count as a very short price
+extreme_high_odds: 3.50      # odds above this count as a very long price
+extreme_edge_pct: 2.5        # required edge at extreme prices (noisier value)
+
+# --- price-skew handling ---
+short_fav_odds: 1.65         # odds at/below this = short favorite
+long_dog_odds: 2.40          # odds at/above this = long underdog
+price_skew_edge_pct: 3.0     # required edge for skewed prices (skew risk)
+
+# --- deep handicap lines ---
+deep_line_threshold: 1.5     # |line| at/above this is a deep AH line
+deep_line_edge_pct: 2.0      # required edge on deep lines (harder to model)
+
+# --- side selection ---
+tie_breaker_delta_pct: 0.3   # if edges are within this, favor price further from 2.0
+
+# --- recent-market-condition signals ---
+movement_stable_band_pct: 0.5      # |delta| below this = 'stable' (no signal)
+steam_threshold_pct: 2.0           # |delta| at/above this flags steam
+steam_velocity_pct: 1.5            # last-step velocity at/above this flags steam
+movement_confirm_discount_pct: 0.5 # lower the bar when market confirms our side
+steam_confirm_extra_pct: 0.5       # extra discount when the confirming move is steam
+movement_adverse_bump_pct: 1.0     # raise the bar when market moves against us
+steam_adverse_extra_pct: 0.5       # extra bump when the adverse move is steam
+
+# --- stake sizing (fractional Kelly) ---
+kelly_multiplier: 0.25       # quarter-Kelly for safer compounding
+max_stake_fraction: 0.05     # cap any single stake at 5% of bankroll
