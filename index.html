@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiply: DCA Simulator</title>
+<style>
+  :root { --bg:#fafaf7; --fg:#1c1c1a; --muted:#6b6b66; --card:#fff; --line:#e3e3dc;
+          --c1:#2f6f9f; --c2:#c4572b; --c3:#8a6bb8; --c4:#2f8f5b; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16161a; --fg:#ececea; --muted:#9a9a94; --card:#1f1f24; --line:#34343b;
+            --c1:#6aaee0; --c2:#e8895f; --c3:#b49be0; --c4:#5fc48a; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui,sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  p.sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  label { display:block; font-size:12px; color:var(--muted); }
+  input { width:100%; padding:7px 8px; margin-top:3px; border:1px solid var(--line); border-radius:6px;
+          background:var(--bg); color:var(--fg); font:inherit; }
+  button { margin-top:14px; padding:8px 16px; border:0; border-radius:6px; background:var(--c1); color:#fff; font:inherit; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:right; padding:7px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; white-space:normal; }
+  th { color:var(--muted); font-weight:500; }
+  .scroll { overflow-x:auto; }
+  canvas { width:100%; height:340px; display:block; }
+  .legend { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; margin-top:8px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; }
+  .note { font-size:12px; color:var(--muted); }
+  h2 { font-size:15px; margin:0 0 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>DCA Simulator: TSLA-like and SpaceX-like stocks</h1>
+  <p class="sub">Monte Carlo comparison of recurring buys, lump sum and core + satellite. Assumptions you set, not forecasts.</p>
+
+  <div class="card">
+    <h2>Your plan</h2>
+    <div class="grid">
+      <label>Starting amount ($)<input id="initial" type="number" value="0" min="0"></label>
+      <label>Monthly buy ($)<input id="monthly" type="number" value="1000" min="0"></label>
+      <label>Years<input id="years" type="number" value="10" min="1" max="40"></label>
+      <label>Satellite share (%)<input id="satellite" type="number" value="40" min="0" max="100"></label>
+      <label>Cap per stock (%)<input id="cap" type="number" value="20" min="1" max="100"></label>
+      <label>Crash chance / year (%)<input id="crashProb" type="number" value="0" min="0" max="100"></label>
+      <label>Crash size (%)<input id="crashSize" type="number" value="40" min="1" max="95"></label>
+    </div>
+    <h2 style="margin-top:16px">Return assumptions (yearly)</h2>
+    <div class="grid">
+      <label>Core return (%)<input id="coreMu" type="number" value="8"></label>
+      <label>Core volatility (%)<input id="coreSigma" type="number" value="16"></label>
+      <label>Stock A return (%)<input id="aMu" type="number" value="15"></label>
+      <label>Stock A volatility (%)<input id="aSigma" type="number" value="55"></label>
+      <label>Stock B return (%)<input id="bMu" type="number" value="15"></label>
+      <label>Stock B volatility (%)<input id="bSigma" type="number" value="60"></label>
+      <label>Simulations<input id="sims" type="number" value="2000" min="100" max="10000" step="100"></label>
+    </div>
+    <button id="run">Run simulation</button>
+  </div>
+
+  <div class="card">
+    <h2>Outcomes</h2>
+    <div class="scroll"><table id="table"></table></div>
+    <p class="note" id="contrib"></p>
+  </div>
+
+  <div class="card">
+    <h2>Median path with 10th to 90th percentile band</h2>
+    <canvas id="chart"></canvas>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <p class="note">
+    Stock A and B are generic high-volatility stocks (defaults resemble TSLA and SPCX). Prices are simulated, not live.
+    The crash overlay is an extra risk on top of the assumed return, and the stocks fall together.
+    Results depend entirely on the inputs. This is an educational tool, not investment advice.
+  </p>
+</main>
+<script src="sim.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const num = (id) => parseFloat($(id).value) || 0;
+const money = (x) => '$' + Math.round(x).toLocaleString();
+const pct = (x) => (x * 100).toFixed(0) + '%';
+const COLORS = { core:'--c1', dcaBasket:'--c2', lumpBasket:'--c3', coreSat:'--c4' };
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+function params() {
+  return {
+    initial: num('initial'), monthly: num('monthly'), years: Math.max(1, num('years')),
+    sims: Math.min(10000, Math.max(100, num('sims'))),
+    satellite: num('satellite') / 100, cap: num('cap') / 100,
+    crashProb: num('crashProb') / 100, crashSize: num('crashSize') / 100,
+    core: { mu: num('coreMu') / 100, sigma: num('coreSigma') / 100 },
+    stockA: { mu: num('aMu') / 100, sigma: num('aSigma') / 100 },
+    stockB: { mu: num('bMu') / 100, sigma: num('bSigma') / 100 },
+  };
+}
+
+function renderTable(r) {
+  const head = '<tr><th>Strategy</th><th>Bad (10th)</th><th>Typical (median)</th><th>Good (90th)</th><th>Average</th><th>Ends below deposits</th><th>Typical worst drop</th><th>Chance of 50%+ drop</th></tr>';
+  const rows = Object.entries(r.strategies).map(([k, s]) =>
+    `<tr><td><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${css(COLORS[k])};margin-right:6px"></i>${s.label}</td>` +
+    `<td>${money(s.p10)}</td><td>${money(s.p50)}</td><td>${money(s.p90)}</td><td>${money(s.mean)}</td>` +
+    `<td>${pct(s.probLoss)}</td><td>${pct(s.medianMaxDD)}</td><td>${pct(s.probDD50)}</td></tr>`).join('');
+  $('table').innerHTML = head + rows;
+  $('contrib').textContent = `Total you put in over ${r.params.years} years: ${money(r.contributed)}. ` +
+    'Average above median means a few huge wins pull the average up while the typical run lags.';
+}
+
+function renderChart(r) {
+  const cv = $('chart'), dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  const g = cv.getContext('2d'); g.scale(dpr, dpr);
+  const pad = { l: 64, r: 12, t: 10, b: 26 };
+  const entries = Object.entries(r.strategies);
+  // clip the y-axis at the highest median or core p90 so one lucky tail does not flatten everything
+  const ymax = Math.max(...entries.map(([, s]) => s.bands.p50[r.months - 1]), r.strategies.core.bands.p90[r.months - 1]) * 1.15;
+  const x = (t) => pad.l + (t / (r.months - 1)) * (W - pad.l - pad.r);
+  const y = (v) => pad.t + (1 - Math.min(v, ymax) / ymax) * (H - pad.t - pad.b);
+  g.font = '11px system-ui'; g.fillStyle = css('--muted'); g.strokeStyle = css('--line');
+  for (let i = 0; i <= 4; i++) {
+    const v = (ymax * i) / 4;
+    g.beginPath(); g.moveTo(pad.l, y(v)); g.lineTo(W - pad.r, y(v)); g.stroke();
+    g.textAlign = 'right'; g.fillText(money(v), pad.l - 6, y(v) + 4);
+  }
+  g.textAlign = 'center';
+  for (let yr = 0; yr <= r.params.years; yr += Math.max(1, Math.round(r.params.years / 8))) {
+    g.fillText(yr + 'y', x(Math.min(yr * 12, r.months - 1)), H - 8);
+  }
+  entries.forEach(([k, s]) => {
+    const c = css(COLORS[k]);
+    g.beginPath();
+    s.bands.p90.forEach((v, t) => (t ? g.lineTo(x(t), y(v)) : g.moveTo(x(t), y(v))));
+    for (let t = r.months - 1; t >= 0; t--) g.lineTo(x(t), y(s.bands.p10[t]));
+    g.closePath(); g.globalAlpha = 0.12; g.fillStyle = c; g.fill(); g.globalAlpha = 1;
+    g.beginPath(); g.strokeStyle = c; g.lineWidth = 2;
+    s.bands.p50.forEach((v, t) => (t ? g.lineTo(x(t), y(v)) : g.moveTo(x(t), y(v))));
+    g.stroke();
+  });
+  g.lineWidth = 1;
+  $('legend').innerHTML = entries.map(([k, s]) => `<span><i style="background:${css(COLORS[k])}"></i>${s.label}</span>`).join('');
+}
+
+function run() {
+  const r = Sim.simulate(params());
+  renderTable(r); renderChart(r);
+}
+$('run').addEventListener('click', run);
+window.addEventListener('resize', run);
+run();
+</script>
+</body>
+</html>
