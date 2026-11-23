@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Singing Tree · Marina Bay 2026</title>
+<meta name="description" content="A 42-metre Christmas tree, a 1,284-voice choir and eight autonomous agents running every lamp, flake and cue. Take the live lighting console. Bayfront Promenade, Singapore · 12 Dec 2026 – 4 Jan 2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2304120E'/%3E%3Cpath d='M16 4l3 5h-6zM16 9l6 8H10zM16 15l8 10H8z' fill='%234BE3A5'/%3E%3Ccircle cx='16' cy='4' r='2.4' fill='%23FFC24B'/%3E%3Crect x='14.6' y='25' width='2.8' height='3' fill='%23C81038'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="aurora-field" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
+<div class="grain" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="brand" href="#stage" aria-label="The Singing Tree — home">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4BE3A5"/><stop offset="1" stop-color="#17513F"/></linearGradient></defs>
+      <path d="M20 8l6.5 9h-13zM20 14l9 12h-18zM20 21l11.5 13h-23z" fill="url(#bg1)"/>
+      <rect x="18.4" y="33" width="3.2" height="4" fill="#C81038"/>
+      <path d="M20 1.6l1.7 3.6 3.9.5-2.9 2.7.8 3.9L20 10.4l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="#FFC24B"/>
+      <circle cx="13" cy="22" r="1.5" fill="#FF3B5C"/><circle cx="27" cy="27" r="1.5" fill="#5CD2FF"/>
+      <circle cx="20" cy="18" r="1.3" fill="#FFD98A"/><circle cx="10" cy="31" r="1.5" fill="#FFC24B"/><circle cx="30" cy="33" r="1.5" fill="#FF5FD2"/>
+    </svg>
+    <span><b>The Singing Tree</b><span>MARINA BAY · SG · MMXXVI</span></span>
+  </a>
+  <nav class="nav-links" id="navLinks" aria-label="Sections">
+    <a href="#stage" class="active">Stage</a>
+    <a href="#console">Console</a>
+    <a href="#agents">Agents</a>
+    <a href="#choir">Choir</a>
+    <a href="#ops">Run of show</a>
+    <a href="#visit">Visit</a>
+  </nav>
+  <div class="nav-right">
+    <button class="sound-btn" id="soundBtn" aria-pressed="true" title="Mute or unmute everything">
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="lbl" id="soundLbl">Sound on</span>
+    </button>
+    <a href="#visit" class="btn btn-primary btn-sm">Reserve</a>
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="navLinks" aria-label="Menu"><i></i><i></i><i></i></button>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="audio-hint" id="audioHint">Tap anywhere to wake the audio</div>
+</header>
+
+<main id="main">
+
+<!-- ===================== HERO / STAGE ===================== -->
+<section id="stage" class="hero">
+  <canvas id="heroCanvas" aria-label="Live render of the 42-metre singing Christmas tree at Marina Bay. Drag to orbit; tap the tree to send a spark."></canvas>
+  <div class="hero-scrim" aria-hidden="true"></div>
+  <div class="wrap hero-inner">
+    <div class="hero-top">
+      <span class="live-pill"><span class="dot live"></span> LIVE RENDER · SEASON 2026 · <span id="clock">--:--:--</span> SGT</span>
+      <div class="hud" role="status" aria-live="off">
+        <h4><span>AGENT TELEMETRY</span><span id="hudFps" style="color:var(--muted)">60 FPS</span></h4>
+        <div class="hud-grid">
+          <div class="hud-cell"><b id="hudLamps">38,400</b><span>Lamps live</span></div>
+          <div class="hud-cell"><b id="hudVoices">1,284</b><span>Voices</span></div>
+          <div class="hud-cell hide-xs"><b id="hudLoad">214</b><span>Load kW</span></div>
+          <div class="hud-cell hide-xs"><b id="hudWind">9</b><span>Wind km/h</span></div>
+          <div class="hud-cell hide-sm"><b id="hudAgents">6/8</b><span>Zones owned</span></div>
+          <div class="hud-cell hide-sm"><b id="hudReady">75%</b><span>Readiness</span></div>
+        </div>
+        <div class="hud-bar">
+          <div class="meter" id="meter" aria-hidden="true"></div>
+          <div class="hud-cue" id="hudCue">STANDBY · house open, agents on station</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-copy">
+      <p class="hero-eyebrow">12 DEC 2026 → 04 JAN 2027 · BAYFRONT PROMENADE · MARINA BAY, SINGAPORE</p>
+      <h1><span class="word" style="animation-delay:.05s">The</span> <span class="word" style="animation-delay:.16s">Singing</span> <span class="word" style="animation-delay:.28s"><em>Tree</em></span></h1>
+      <p class="hero-sub">Forty-two metres of Douglas fir. 38,400 lamps. A 1,284-voice choir at its roots. Eight autonomous agents hold the light, the snow and every cue — and tonight, they hand you the console.</p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" id="heroRun">Brief the agents</button>
+        <a href="#console" class="btn">Open the console <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-facts">
+        <div><b>42 m</b><span>Tree height</span></div>
+        <div><b>1,284</b><span>Voices</span></div>
+        <div><b>8</b><span>Agents</span></div>
+        <div><b>22</b><span>Show nights</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scrollcue" aria-hidden="true"><span>SCROLL</span><i></i></div>
+</section>
+<div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<!-- ===================== CONSOLE ===================== -->
+<section id="console" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="idx">01</span>
+      <div>
+        <p class="eyebrow">Live control · no mock-ups</p>
+        <h2>Lighting &amp; operations <em>console</em></h2>
+        <p class="lede">Move a slider and the tree answers on the same frame — the same lamp array, the same snow, the same choir bus you hear. Drag the stage to orbit the canopy; tap the tree to send a spark up the spine.</p>
+      </div>
+    </div>
+    <div class="console-grid">
+      <div class="monitor-col reveal">
+        <div class="monitor">
+          <canvas id="monitorCanvas" aria-label="Console stage monitor. Drag to orbit the tree; tap to spark."></canvas>
+          <div class="monitor-ov">
+            <div class="monitor-row">
+              <span class="chip gold">STAGE MONITOR · CAM 01</span>
+              <span class="chip" id="monPal">CLASSIC</span>
+            </div>
+            <div class="monitor-row">
+              <span class="chip ice">DRAG TO ORBIT · TAP TO SPARK · DOUBLE-CLICK RESETS</span>
+              <span class="chip" id="monState">38,400 LAMPS</span>
+            </div>
+          </div>
+        </div>
+        <div class="transport" style="margin-top:14px">
+          <span class="status" id="transportStatus" style="color:var(--warn)"><span class="dot"></span> HOLD</span>
+          <button class="btn btn-crimson btn-sm" id="runBtn2">Run the show</button>
+          <button class="btn btn-sm" id="pauseBtn2" disabled>Pause</button>
+          <button class="btn btn-sm" id="stopBtn2" disabled>Reset</button>
+          <span class="mono" style="font-size:10px;color:var(--muted);margin-left:auto" id="transportTime">00:00 / 00:56</span>
+        </div>
+      </div>
+
+      <div class="rack reveal" style="transition-delay:.1s">
+        <div class="rack-group">
+          <h3>Canopy light</h3>
+          <div class="ctrl-grid">
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cLamps">Lamp density</label><span class="ctrl-val" id="vLamps">2,200</span></div>
+              <input type="range" id="cLamps" min="400" max="3600" step="50" value="2200">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cTwinkle">Twinkle rate</label><span class="ctrl-val" id="vTwinkle">0.85×</span></div>
+              <input type="range" id="cTwinkle" min="0" max="200" step="1" value="85">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cBloom">Bloom / glow</label><span class="ctrl-val" id="vBloom">100%</span></div>
+              <input type="range" id="cBloom" min="20" max="170" step="1" value="100">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cStar">Topper beacon</label><span class="ctrl-val" id="vStar">70%</span></div>
+              <input type="range" id="cStar" min="0" max="100" step="1" value="70">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cChase">Chase pattern</label></div>
+              <select id="cChase">
+                <option value="wave">Vertical wave</option>
+                <option value="chase">Spiral chase</option>
+                <option value="sparkle">Sparkle pops</option>
+                <option value="candle">Candle flicker</option>
+                <option value="steady">Steady burn</option>
+              </select>
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cQuality">Render quality</label></div>
+              <select id="cQuality">
+                <option value="cinematic">Cinematic</option>
+                <option value="balanced">Balanced</option>
+                <option value="performance">Performance</option>
+              </select>
+            </div>
+          </div>
+          <div class="ctrl" style="margin-top:15px">
+            <div class="ctrl-lab"><label>Palette</label><span class="ctrl-val" id="vPalette">Classic</span></div>
+            <div class="seg" id="palSeg" role="group" aria-label="Light palette"></div>
+          </div>
+        </div>
+
+        <div class="rack-group">
+          <h3>Atmosphere</h3>
+          <div class="ctrl-grid">
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cSnow">Snowfall</label><span class="ctrl-val" id="vSnow">45%</span></div>
+              <input type="range" id="cSnow" min="0" max="100" step="1" value="45">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cWind">Wind</label><span class="ctrl-val" id="vWind">+18</span></div>
+              <input type="range" id="cWind" min="-100" max="100" step="1" value="18">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cHaze">Haze &amp; god rays</label><span class="ctrl-val" id="vHaze">40%</span></div>
+              <input type="range" id="cHaze" min="0" max="100" step="1" value="40">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cZoom">Camera distance</label><span class="ctrl-val" id="vZoom">1.00×</span></div>
+              <input type="range" id="cZoom" min="80" max="145" step="1" value="100">
+            </div>
+          </div>
+          <div class="toggles" style="margin-top:15px">
+            <button class="tgl" id="tDrift" role="switch" aria-checked="true"><span class="knob"></span>Camera drift</button>
+            <button class="tgl" id="tBlueprint" role="switch" aria-checked="false"><span class="knob"></span>Blueprint</button>
+            <button class="tgl" id="tGuides" role="switch" aria-checked="false"><span class="knob"></span>Zone guides</button>
+          </div>
+        </div>
+
+        <div class="rack-group">
+          <h3>Choir &amp; sound</h3>
+          <div class="ctrl-grid">
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cChoir">Choir bus</label><span class="ctrl-val" id="vChoir">65%</span></div>
+              <input type="range" id="cChoir" min="0" max="100" step="1" value="65">
+            </div>
+            <div class="ctrl">
+              <div class="ctrl-lab"><label for="cVerb">Cathedral reverb</label><span class="ctrl-val" id="vVerb">55%</span></div>
+              <input type="range" id="cVerb" min="0" max="100" step="1" value="55">
+            </div>
+          </div>
+          <div class="ctrl" style="margin-top:14px">
+            <div class="ctrl-lab"><label>Sections on the bus</label><span class="ctrl-val" id="vSections">SATB</span></div>
+            <div class="voice-chips" id="voiceChips" role="group" aria-label="Choir sections">
+              <button data-sec="S" aria-pressed="true" title="Soprano — 384 voices">S</button>
+              <button data-sec="A" aria-pressed="true" title="Alto — 336 voices">A</button>
+              <button data-sec="T" aria-pressed="true" title="Tenor — 288 voices">T</button>
+              <button data-sec="B" aria-pressed="true" title="Bass — 276 voices">B</button>
+            </div>
+          </div>
+          <button class="btn btn-sm" id="btnTestChoir" style="margin-top:14px;width:100%">♪ Sing a test chord</button>
+        </div>
+
+        <div class="rack-group">
+          <h3>Console actions</h3>
+          <div class="rack-actions">
+            <button class="btn btn-sm" id="btnReset">↺ Reset defaults</button>
+            <button class="btn btn-sm" id="btnRandom">⚄ Randomise look</button>
+            <button class="btn btn-sm" id="btnPng">⤓ Export frame (PNG)</button>
+            <button class="btn btn-sm" id="btnJson">⤓ Cue sheet (JSON)</button>
+          </div>
+          <p class="mono" style="font-size:10px;color:var(--muted-2);margin-top:12px;line-height:1.6">
+            Every export reflects the frame and settings currently on stage, including agent assignments.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AGENTS ===================== -->
+<section id="agents" class="band" style="background:linear-gradient(180deg,transparent,rgba(11,44,35,.42),transparent)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="idx">02</span>
+      <div>
+        <p class="eyebrow">Crew assignment</p>
+        <h2>Eight agents, <em>eight zones</em></h2>
+        <p class="lede">Every zone of the production is owned by a named agent. Drag an agent onto a zone — or tap to select, then tap to place. Vacant zones go dark on the stage above until somebody owns them.</p>
+      </div>
+    </div>
+
+    <div class="board-top reveal">
+      <div class="ring">
+        <svg width="82" height="82" viewBox="0 0 82 82" aria-hidden="true">
+          <circle cx="41" cy="41" r="34" fill="none" stroke="rgba(148,173,165,.18)" stroke-width="7"/>
+          <circle id="readyRing" cx="41" cy="41" r="34" fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round"
+                  stroke-dasharray="213.6" stroke-dashoffset="53.4" style="transition:stroke-dashoffset .7s cubic-bezier(.22,.75,.2,1)"/>
+          <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4BE3A5"/><stop offset="1" stop-color="#FFC24B"/></linearGradient></defs>
+        </svg>
+        <b id="readyPct">75%</b>
+      </div>
+      <div class="txt">
+        <b id="readyTitle">Two zones unowned — the show is on hold</b>
+        <span id="readySub">Upper canopy and lower canopy are dark. Place the two idle agents, or let the scheduler do it.</span>
+      </div>
+      <button class="btn btn-primary btn-sm pulse" id="btnAuto">⚡ Auto-assign crew</button>
+      <button class="btn btn-sm" id="btnClear">Clear board</button>
+    </div>
+
+    <div class="board">
+      <div class="reveal">
+        <p class="flabel">Agent roster · drag or tap</p>
+        <div class="roster" id="roster"></div>
+      </div>
+      <div class="reveal" style="transition-delay:.08s">
+        <p class="flabel">Production zones · drop targets</p>
+        <div class="zones" id="zones"></div>
+      </div>
+    </div>
+
+    <div class="feed panel pad reveal" style="margin-top:20px">
+      <div class="feed-head">
+        <h3>OPS FEED · SGT</h3>
+        <span class="mono" style="font-size:10px;color:var(--muted-2)" id="feedCount">0 entries</span>
+      </div>
+      <div class="feed-list" id="feed" role="log" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CHOIR ===================== -->
+<section id="choir" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="idx">03</span>
+      <div>
+        <p class="eyebrow">1,284 voices · four sections</p>
+        <h2>The choir at the <em>roots</em></h2>
+        <p class="lede">CANTUS-04 splits 1,284 singers into four sections and re-voices them for every carol. Press play: the arrangement is synthesised live in your browser, and the canopy chases the downbeat.</p>
+      </div>
+    </div>
+    <div class="choir-grid">
+      <div class="reveal">
+        <div class="bignum">1,284</div>
+        <p class="mono" style="font-size:10px;letter-spacing:.2em;color:var(--gold);margin-top:12px">VOICES ON THE RING · 42 m CIRCUMFERENCE</p>
+        <div class="sections" id="secBars"></div>
+        <div class="panel pad" style="margin-top:22px">
+          <p style="color:var(--cream-2);font-style:italic;font-family:var(--display);font-size:16px;line-height:1.5">
+            “Tropical air carries sound differently. We tune the ring at 29 °C, hold the sops off the PA, and let the fir do the diffusion.”
+          </p>
+          <p class="mono" style="font-size:10px;color:var(--muted);margin-top:12px;letter-spacing:.1em">CANTUS-04 · CHOIRMASTER AGENT · REV 11</p>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:.08s">
+        <p class="flabel">Repertoire · live synthesis</p>
+        <div class="repertoire" id="repertoire"></div>
+        <div class="nowplaying">
+          <span class="mono" style="font-size:10px;letter-spacing:.14em;color:var(--mint)" id="npLabel">STANDBY</span>
+          <div class="np-bar"><i id="npFill"></i></div>
+          <button class="btn btn-xs" id="npStop">■ Stop</button>
+        </div>
+        <p class="mono" style="font-size:10px;color:var(--muted-2);margin-top:12px;line-height:1.7">
+          Arrangements generated as SATB voice leading over a shared chord table. No audio files — oscillators, formant filters and a synthesised cathedral impulse response.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== OPS ===================== -->
+<section id="ops" class="band" style="background:linear-gradient(180deg,transparent,rgba(18,73,110,.16),transparent)">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="idx">04</span>
+      <div>
+        <p class="eyebrow">Run of show · 56 seconds</p>
+        <h2>Seven cues, <em>no dead air</em></h2>
+        <p class="lede">The nightly sequence, compressed. Jump to any cue and the owning agent picks it up from there — the console sliders follow the cue stack in real time. A cue whose zone has no owner is dropped.</p>
+      </div>
+    </div>
+    <div class="ops-transport reveal">
+      <button class="btn btn-crimson btn-sm" id="runBtn3">▶ Run</button>
+      <button class="btn btn-sm" id="pauseBtn3" disabled>❚❚ Pause</button>
+      <button class="btn btn-sm" id="stopBtn3" disabled>↺ Reset</button>
+      <div class="scrub" id="scrub" role="slider" tabindex="0" aria-label="Show position" aria-valuemin="0" aria-valuemax="56" aria-valuenow="0">
+        <div class="track"><div class="fill" id="scrubFill"></div></div>
+        <div class="marks" id="scrubMarks"></div>
+        <div class="head" id="scrubHead"></div>
+      </div>
+      <span class="mono" style="font-size:11px;color:var(--gold-2)" id="opsTime">00:00</span>
+    </div>
+    <div class="timeline" id="timeline"></div>
+    <div class="stats reveal" id="statsBand">
+      <div class="stat"><b data-count="42" data-suffix=" m">0</b><span>Tree height</span></div>
+      <div class="stat"><b data-count="38400">0</b><span>Lamps</span></div>
+      <div class="stat"><b data-count="1284">0</b><span>Voices</span></div>
+      <div class="stat"><b data-count="1912">0</b><span>Ornaments</span></div>
+      <div class="stat"><b data-count="8">0</b><span>Agents</span></div>
+      <div class="stat"><b data-count="22">0</b><span>Show nights</span></div>
+    </div>
+    <div class="ops-notes">
+      <div class="note reveal" style="--ac:var(--ice)">
+        <h4><span class="dot" style="color:var(--ice)"></span> Wind &amp; weather</h4>
+        <p>FLURRY-06 holds the foam-flake towers below 12 km/h gusts. Above 34 km/h the topper is feathered and the snow array parks. Tonight: 9 km/h, 29 °C, 82% humidity.</p>
+      </div>
+      <div class="note reveal" style="--ac:var(--amber);transition-delay:.07s">
+        <h4><span class="dot" style="color:var(--amber)"></span> Power redundancy</h4>
+        <p>VESTA-02 runs 214 kW across two independent feeds with a 40 kW shed plan. Lamp strings are addressed in 96 blocks, so a single failure never darkens more than 400 lamps.</p>
+      </div>
+      <div class="note reveal" style="--ac:var(--magenta);transition-delay:.14s">
+        <h4><span class="dot" style="color:var(--magenta)"></span> Crowd &amp; cordon</h4>
+        <p>SENTINEL-07 keeps plaza density under 1.4 persons/m² and releases the house in three waves after curtain. A 6 m cordon is held around the choir ring during cold-spark fountains.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== VISIT ===================== -->
+<section id="visit" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="idx">05</span>
+      <div>
+        <p class="eyebrow">Bayfront Promenade · all times SGT (GMT+8)</p>
+        <h2>Reserve your <em>viewing</em></h2>
+        <p class="lede">Free to stand, S$28 to sit under the canopy, S$58 to stand beside the choir ring. Every reservation is held for 20 minutes past the half-hour call.</p>
+      </div>
+    </div>
+    <div class="visit-grid">
+      <div class="reveal">
+        <div class="infolist">
+          <div><b>Season</b><p>12 December 2026 – 4 January 2027 · 22 show nights, dark on 15 &amp; 22 Dec.</p></div>
+          <div><b>Showtimes</b><p>19:30 · 20:30 · 21:30 SGT. Countdown show at 23:45 on 31 December.</p></div>
+          <div><b>Address</b><p>Bayfront Promenade, Marina Bay, Singapore 018956. Enter via the Bayfront MRT link, Exit B.</p></div>
+          <div><b>Getting there</b><p>Bayfront (CE1/DT16) 4 min walk · Raffles Place (EW14/NS26) 11 min · Taxi drop at Bayfront Avenue.</p></div>
+          <div><b>Access</b><p>Step-free promenade throughout, 42 wheelchair bays in Canopy Circle, induction loop at the Choir Loft, quiet show at 19:30 on 13 &amp; 20 Dec.</p></div>
+          <div><b>Weather</b><p>Tropical winter — 29 °C at curtain. The snow is a biodegradable foam-flake array; it melts on contact and leaves no residue.</p></div>
+        </div>
+        <div class="plan">
+          <svg viewBox="0 0 420 250" role="img" aria-label="Site plan of the Bayfront Promenade showing the tree, choir ring and three viewing zones">
+            <defs>
+              <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d3a52"/><stop offset="1" stop-color="#06202c"/></linearGradient>
+              <radialGradient id="glowp"><stop offset="0" stop-color="#FFC24B" stop-opacity=".5"/><stop offset="1" stop-color="#FFC24B" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="420" height="250" fill="#04120E"/>
+            <path d="M0 0h420v78c-70 16-150 22-230 14C120 86 60 74 0 62z" fill="url(#water)"/>
+            <g stroke="#5CD2FF" stroke-opacity=".22" stroke-width="1">
+              <path d="M12 30h60M96 44h74M210 26h58M300 48h84M40 56h48M250 60h60"/>
+            </g>
+            <text x="14" y="20" fill="#5CD2FF" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="2" opacity=".8">MARINA BAY</text>
+            <path d="M0 62c60 12 120 24 190 30 80 8 160 2 230-14v172H0z" fill="#08201A"/>
+            <ellipse cx="210" cy="150" rx="120" ry="66" fill="url(#glowp)"/>
+            <g id="plan-free" class="zn"><path d="M14 196c60-18 130-26 196-26s136 8 196 26v42H14z" fill="#5CD2FF" fill-opacity=".12" stroke="#5CD2FF" stroke-width="1.2" stroke-dasharray="6 4"/></g>
+            <g id="plan-canopy" class="zn"><path d="M210 150m-96 0a96 54 0 1 0 192 0a96 54 0 1 0-192 0" fill="#FFC24B" fill-opacity=".14" stroke="#FFC24B" stroke-width="1.4"/></g>
+            <g id="plan-loft" class="zn"><ellipse cx="210" cy="150" rx="52" ry="29" fill="#4BE3A5" fill-opacity=".2" stroke="#4BE3A5" stroke-width="1.4" stroke-dasharray="4 3"/></g>
+            <circle cx="210" cy="150" r="17" fill="#0B2C23" stroke="#4BE3A5" stroke-width="1.6"/>
+            <path d="M210 137l7 10h-14zM210 143l9 12h-18z" fill="#4BE3A5"/>
+            <circle cx="210" cy="134" r="3.4" fill="#FFC24B"/>
+            <text x="210" y="182" text-anchor="middle" fill="#F8EFE4" font-family="JetBrains Mono, monospace" font-size="7.5" letter-spacing="1.6">TREE · 42 m</text>
+            <text x="210" y="120" text-anchor="middle" fill="#4BE3A5" font-family="JetBrains Mono, monospace" font-size="7" letter-spacing="1.6">CHOIR LOFT</text>
+            <text x="318" y="150" fill="#FFC24B" font-family="JetBrains Mono, monospace" font-size="7" letter-spacing="1.6">CANOPY CIRCLE</text>
+            <text x="210" y="228" text-anchor="middle" fill="#5CD2FF" font-family="JetBrains Mono, monospace" font-size="7" letter-spacing="1.6">PROMENADE · FREE STANDING</text>
+            <g transform="translate(36,104)"><rect x="-13" y="-9" width="26" height="18" rx="4" fill="#C81038"/><text x="0" y="4" text-anchor="middle" fill="#fff" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700">MRT</text></g>
+            <path d="M49 104h58" stroke="#94ADA5" stroke-width="1" stroke-dasharray="3 3"/>
+            <g transform="translate(386,32)" stroke="#94ADA5" stroke-width="1"><path d="M0 -10v20M-10 0h20"/><path d="M0 -10l3 5h-6z" fill="#FFC24B" stroke="none"/></g>
+            <text x="386" y="52" text-anchor="middle" fill="#94ADA5" font-family="JetBrains Mono, monospace" font-size="7">N</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="panel pad booking reveal" style="transition-delay:.08s" id="bookingCard">
+        <div id="bookingForm">
+          <div>
+            <span class="flabel">1 · Choose a night</span>
+            <div class="chips" id="dateChips" role="group" aria-label="Performance dates"></div>
+          </div>
+          <div style="margin-top:17px">
+            <span class="flabel">2 · Showtime (SGT)</span>
+            <div class="chips" id="timeChips" role="group" aria-label="Showtimes"></div>
+          </div>
+          <div style="margin-top:17px">
+            <span class="flabel">3 · Viewing tier</span>
+            <div class="tiers" id="tiers" role="group" aria-label="Viewing tiers"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:17px;margin-top:17px;align-items:start">
+            <div>
+              <span class="flabel">4 · Guests</span>
+              <div class="qty"><button id="qtyMinus" aria-label="One fewer guest">−</button><b id="qtyVal" aria-live="polite">2</b><button id="qtyPlus" aria-label="One more guest">+</button></div>
+            </div>
+            <div>
+              <label class="flabel" for="bkName">Lead guest</label>
+              <input type="text" id="bkName" placeholder="Name on the reservation" autocomplete="name">
+              <p class="errmsg" id="errName">Please give a name of at least 2 characters.</p>
+            </div>
+          </div>
+          <div style="margin-top:14px">
+            <label class="flabel" for="bkEmail">Email for the pass</label>
+            <input type="email" id="bkEmail" placeholder="you@example.com" autocomplete="email">
+            <p class="errmsg" id="errEmail">That email doesn’t look right.</p>
+          </div>
+          <div class="total" style="margin-top:17px">
+            <div>
+              <span class="mono" style="font-size:9.5px;letter-spacing:.18em;color:var(--muted)">TOTAL · <span id="totalNote">2 GUESTS</span></span>
+              <b id="totalVal">S$56</b>
+            </div>
+            <span class="mono" style="font-size:10px;color:var(--mint);text-align:right" id="availNote">— left</span>
+          </div>
+          <button class="btn btn-primary" id="btnConfirm" style="width:100%;margin-top:15px">Confirm reservation</button>
+          <p class="mono" style="font-size:9.5px;color:var(--muted-2);margin-top:11px;text-align:center;line-height:1.6">
+            Held in this browser only. No payment is taken — this is a demonstration production.
+          </p>
+        </div>
+        <div id="bookingDone" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#stage" style="margin-bottom:14px">
+          <svg viewBox="0 0 40 40" aria-hidden="true" style="width:30px;height:30px">
+            <path d="M20 8l6.5 9h-13zM20 14l9 12h-18zM20 21l11.5 13h-23z" fill="#17513F"/>
+            <path d="M20 1.6l1.7 3.6 3.9.5-2.9 2.7.8 3.9L20 10.4l-3.5 1.9.8-3.9-2.9-2.7 3.9-.5z" fill="#FFC24B"/>
+          </svg>
+          <span><b>The Singing Tree</b><span>MARINA BAY · SG</span></span>
+        </a>
+        <p style="font-size:13px;color:var(--muted);max-width:38ch">A 42-metre singing Christmas tree run by eight autonomous agents. Every light, flake, voice and cue on this page is generated live in your browser — no video, no audio files.</p>
+      </div>
+      <div>
+        <h4>Production</h4>
+        <div class="foot-links">
+          <a href="#console">Lighting console</a>
+          <a href="#agents">Agent board</a>
+          <a href="#choir">Choir &amp; repertoire</a>
+          <a href="#ops">Run of show</a>
+          <button id="footCue">Download cue sheet</button>
+          <button id="footPress">Press kit (.txt)</button>
+        </div>
+      </div>
+      <div>
+        <h4>Good to know</h4>
+        <details><summary>Accessibility</summary><p>Step-free throughout. 42 wheelchair bays in Canopy Circle with companion seating. Induction loop at the Choir Loft. Quiet performances (no cold sparks, snow at 30%) at 19:30 on 13 &amp; 20 December. Assistance dogs welcome.</p></details>
+        <details><summary>Weather policy</summary><p>The show runs in rain. Lightning within 8 km pauses the sequence and the topper is isolated; the house is held under the Bayfront canopy until the all-clear. Tickets are transferable to any night in the season.</p></details>
+        <details><summary>Privacy</summary><p>Your reservation and console preferences live in this browser’s local storage only. Nothing is transmitted. Clearing site data removes your booking reference.</p></details>
+      </div>
+      <div>
+        <h4>Curtain call notes</h4>
+        <p style="font-size:13px;color:var(--muted)">One email per week of the season: cue changes, added showtimes, and the night the agents try something new.</p>
+        <form class="news" id="newsForm" novalidate>
+          <input type="email" id="newsEmail" placeholder="you@example.com" aria-label="Email address">
+          <button class="btn btn-sm btn-primary" type="submit">Join</button>
+        </form>
+        <p class="errmsg" id="errNews">Enter a valid email address.</p>
+        <p class="mono" id="newsOk" style="font-size:10.5px;color:var(--mint);margin-top:10px;display:none">✓ You’re on the list. HERALD-08 will write.</p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 THE SINGING TREE · A FICTIONAL PRODUCTION, BUILT AS AN INTERACTIVE FRONT-END</span>
+      <span>SGT (GMT+8) · <span id="footClock">--:--</span> · RENDERED IN CANVAS 2D + WEB AUDIO</span>
+    </div>
+  </div>
+</footer>
+
+<button class="totop" id="toTop" aria-label="Back to top">↑</button>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
